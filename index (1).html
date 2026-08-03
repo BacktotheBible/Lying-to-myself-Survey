@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Am I Lying to Myself Spiritually?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+/* Brand palette */
+--navy: #171f3b;
+--navy-dark: #0f1526;
+--orange: #d25e2a;
+--orange-dark: #b34a1f;
+--teal: #007c89;
+--teal-dark: #045f69;
+--error: #c0392b; /* standard red — reserved for input errors only */
+--bg: #ffffff;
+--card: #ffffff;
+--text: #262b38; /* dark navy-slate, brand-tinted (not pure black) */
+--text-muted: #5f6572;
+--border: #e6e2d8;
+--tint-warm: #f3f0e9; /* neutral warm panel */
+--tint-orange: #fbeee6; /* faint orange highlight */
+}
+* { box-sizing: border-box; }
+html, body {
+margin: 0;
+padding: 0;
+background: var(--bg);
+color: var(--text);
+font-family: "Poppins", "Helvetica Neue", Arial, sans-serif;
+font-size: 16px;
+line-height: 1.6;
+-webkit-text-size-adjust: 100%;
+text-size-adjust: 100%;
+}
+h1, h2, h3, legend,
+.btn-primary, .btn-secondary,
+.total-score-number, .band-pill, .cat-name {
+font-family: "Poppins", "Helvetica Neue", Arial, sans-serif;
+}
+.site-header {
+background: var(--navy);
+padding: 14px 20px;
+display: flex;
+align-items: center;
+}
+.site-header-logo-link { display: block; line-height: 0; }
+.site-header-logo { height: 36px; display: block; }
+#app {
+max-width: 720px;
+margin: 0 auto;
+padding: 20px 16px 60px;
+}
+.card {
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 14px;
+padding: 24px 22px;
+margin-bottom: 18px;
+box-shadow: 0 1px 4px rgba(23,31,59,0.08);
+}
+h1 {
+font-size: 1.55rem;
+color: var(--navy);
+margin: 0 0 6px;
+}
+h2 {
+font-size: 1.2rem;
+color: var(--navy);
+margin: 0 0 10px;
+}
+h3 {
+font-size: 1.02rem;
+color: var(--navy);
+margin: 0 0 6px;
+}
+p { margin: 0 0 12px; }
+.muted { color: var(--text-muted); font-size: 1rem; }
+.scale-legend {
+display: flex;
+justify-content: space-between;
+font-size: 0.85rem;
+color: var(--text-muted);
+margin: 4px 0 18px;
+background: var(--tint-warm);
+border-radius: 10px;
+padding: 10px 14px;
+}
+.scale-legend-compact {
+margin: 0 0 8px;
+padding: 7px 12px;
+font-size: 0.78rem;
+gap: 6px;
+}
+.scale-legend-compact strong { color: var(--navy); }
+button {
+font-family: inherit;
+cursor: pointer;
+}
+.btn-primary {
+display: inline-block;
+background: var(--navy);
+color: #fff;
+border: none;
+border-radius: 8px;
+padding: 13px 26px;
+font-size: 1rem;
+font-weight: 600;
+width: 100%;
+}
+.btn-primary:hover { background: var(--navy-dark); }
+.btn-primary:disabled {
+background: #a9a9a9;
+cursor: not-allowed;
+}
+.btn-secondary {
+display: inline-block;
+background: transparent;
+color: var(--navy);
+border: 1px solid var(--navy);
+border-radius: 8px;
+padding: 10px 20px;
+font-size: 0.92rem;
+font-weight: 600;
+width: 100%;
+margin-top: 8px;
+}
+#progress-wrap {
+position: sticky;
+top: 0;
+background: var(--bg);
+padding: 10px 0 6px;
+z-index: 5;
+}
+#progress-track {
+height: 6px;
+background: var(--border);
+border-radius: 4px;
+overflow: hidden;
+}
+#progress-fill {
+height: 100%;
+width: 0%;
+background: var(--orange);
+transition: width 0.2s ease;
+}
+#progress-label {
+font-size: 0.8rem;
+color: var(--text-muted);
+margin-top: 4px;
+text-align: right;
+}
+.question {
+padding: 16px 0;
+border-bottom: 1px solid var(--border);
+}
+.question:last-child { border-bottom: none; }
+.question-text {
+font-size: 1rem;
+margin-bottom: 12px;
+}
+.question-num {
+display: inline-block;
+color: var(--orange-dark);
+font-weight: 700;
+margin-right: 6px;
+}
+.scale-row {
+display: flex;
+flex-wrap: wrap;
+gap: 6px;
+justify-content: center;
+}
+.scale-btn {
+flex: 0 0 auto;
+width: 30px;
+height: 38px;
+border: 1.5px solid var(--border);
+background: #fff;
+border-radius: 8px;
+font-size: 0.88rem;
+font-weight: 600;
+color: var(--navy);
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.scale-btn:hover { border-color: var(--orange); }
+.scale-btn.selected {
+background: var(--navy);
+border-color: var(--navy);
+color: #fff;
+}
+.question.missing .question-text { color: var(--error); }
+.question.missing .scale-row .scale-btn { border-color: var(--error); }
+.band-pill {
+display: inline-block;
+padding: 3px 12px;
+border-radius: 999px;
+font-size: 0.82rem;
+font-weight: 700;
+color: #fff;
+}
+.band-clear { background: var(--teal); }
+.band-tender { background: var(--orange); }
+.band-stronghold { background: var(--navy); }
+.total-score-box {
+text-align: center;
+padding: 10px 0 18px;
+}
+.total-score-number {
+font-size: 3rem;
+font-weight: 800;
+color: var(--navy);
+line-height: 1;
+}
+.total-score-max { font-size: 1rem; color: var(--text-muted); }
+.top3-item {
+background: var(--tint-warm);
+border-left: 4px solid var(--orange);
+border-radius: 6px;
+padding: 10px 14px;
+margin-bottom: 10px;
+}
+.top3-score {
+font-weight: 700;
+color: var(--orange-dark);
+}
+.cat-row {
+padding: 14px 0;
+border-bottom: 1px solid var(--border);
+}
+.cat-row:last-child { border-bottom: none; }
+.cat-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 10px;
+margin-bottom: 4px;
+}
+.cat-name { font-weight: 700; color: var(--navy); }
+.cat-score { font-weight: 700; white-space: nowrap; }
+.cat-highest {
+border: 1.5px solid var(--orange);
+border-radius: 10px;
+padding: 12px 14px;
+background: var(--tint-orange);
+}
+fieldset {
+border: none;
+padding: 0;
+margin: 0 0 18px;
+}
+legend {
+font-weight: 600;
+color: var(--navy);
+margin-bottom: 8px;
+padding: 0;
+}
+textarea, input[type="text"] {
+width: 100%;
+font-family: inherit;
+font-size: 0.96rem;
+padding: 10px 12px;
+border: 1.5px solid var(--border);
+border-radius: 8px;
+resize: vertical;
+color: var(--text);
+}
+textarea:focus, input[type="text"]:focus {
+outline: none;
+border-color: var(--teal);
+}
+textarea { min-height: 60px; }
+.checkbox-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 8px 14px;
+}
+.checkbox-item {
+display: flex;
+align-items: center;
+gap: 8px;
+font-size: 0.93rem;
+}
+.checkbox-item input { width: 16px; height: 16px; accent-color: var(--navy); }
+#save-status {
+margin-top: 10px;
+font-size: 0.92rem;
+}
+#save-status.error { color: var(--error); font-weight: 600; }
+#save-status.success { color: var(--teal); font-weight: 600; }
+.closing {
+background: var(--navy);
+color: #fff;
+border-radius: 14px;
+padding: 24px 22px;
+}
+.closing h2 { color: #fff; }
+.closing p { color: #e6e6e6; }
+.hidden { display: none !important; }
+.footer-note {
+text-align: center;
+color: var(--text-muted);
+font-size: 0.8rem;
+margin-top: 10px;
+}
+
+/* ---------- Responsive: scale type down on smaller screens ---------- */
+@media (max-width: 600px) {
+html, body { font-size: 15px; }
+h1 { font-size: 1.3rem; }
+h2 { font-size: 1.1rem; }
+h3 { font-size: 1rem; }
+#app { padding: 16px 12px 50px; }
+.card { padding: 20px 16px; }
+.total-score-number { font-size: 2.5rem; }
+.scale-legend {
+flex-direction: column;
+gap: 3px;
+text-align: left;
+font-size: 0.82rem;
+}
+.scale-legend-compact {
+flex-direction: row;
+flex-wrap: wrap;
+justify-content: center;
+gap: 4px 10px;
+text-align: center;
+}
+.checkbox-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 400px) {
+html, body { font-size: 14.5px; }
+h1 { font-size: 1.2rem; }
+#app { padding-left: 10px; padding-right: 10px; }
+.card { padding: 16px 13px; }
+.scale-row { gap: 4px; }
+.scale-btn { width: 26px; height: 34px; font-size: 0.78rem; }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+<a href="https://www.backtothebible.org/" class="site-header-logo-link">
+<img src="https://static.wixstatic.com/media/65eecc_7c8271792ad940f495475a60fa895fc8~mv2.png/v1/fill/w_139,h_48,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/2024-BacktotheBible-Logo_edited.png" alt="Back to the Bible" class="site-header-logo">
+</a>
+</header>
+<div id="app">
+<!-- SCREEN: INTRO -->
+<section id="screen-intro" class="card">
+<h1>Am I Lying to Myself Spiritually?</h1>
+<p class="muted">A self-assessment from the Center for Scripture Absorption &middot; Arnie Cole, Ed.D. &middot; Back to the Bible</p>
+<p>Below are 20 statements about common ways Christians avoid spiritual honesty. Answer based on your <strong>real life right now</strong>, not what you believe should be true of you.</p>
+<div class="scale-legend">
+<span>0 = Not like me at all</span>
+<span>5 = Sometimes true / unsure</span>
+<span>10 = Very true of me</span>
+</div>
+<p class="muted">A higher score does not mean you are a bad Christian. It means this may be an area where you are spiritually protecting yourself from truth, obedience, growth, or helping others follow Jesus.</p>
+<p class="muted">Your responses are recorded anonymously &mdash; no name or email is collected.</p>
+<button class="btn-primary" id="btn-start">Begin the Assessment</button>
+</section>
+<!-- SCREEN: SURVEY -->
+<section id="screen-survey" class="hidden">
+<div id="progress-wrap">
+<div class="scale-legend scale-legend-compact">
+<span><strong>0</strong> = Not like me at all</span>
+<span><strong>5</strong> = Sometimes true / unsure</span>
+<span><strong>10</strong> = Very true of me</span>
+</div>
+<div id="progress-track"><div id="progress-fill"></div></div>
+<div id="progress-label">0 of 20 answered</div>
+</div>
+<div class="card">
+<div id="questions-list"></div>
+</div>
+<button class="btn-primary" id="btn-see-results">See My Results</button>
+</section>
+<!-- SCREEN: RESULTS -->
+<section id="screen-results" class="hidden">
+<div class="card">
+<h2>Your Total Score</h2>
+<div class="total-score-box">
+<div class="total-score-number" id="total-score-number">0</div>
+<div class="total-score-max">out of 200</div>
+<div style="margin-top:10px;"><span class="band-pill" id="total-band-pill"></span></div>
+<p class="muted" id="total-band-desc" style="margin-top:10px;"></p>
+</div>
+<p class="muted">But the total score is not the most important part.</p>
+</div>
+<div class="card">
+<h2>Your Top 3 Highest-Scoring Statements</h2>
+<p class="muted">These are probably the clearest places where you are lying to yourself spiritually.</p>
+<div id="top3-list"></div>
+</div>
+<div class="card">
+<h2>Where You're Protecting Yourself Most</h2>
+<p class="muted">Every response is scored on a 0&ndash;10 scale, averaged within its category. <strong>0&ndash;3.0</strong> = Clear ground &middot; <strong>3.1&ndash;6.0</strong> = Tender spot &middot; <strong>6.1&ndash;10</strong> = Stronghold.</p>
+<div id="highest-cat-box"></div>
+<h3 style="margin-top:18px;">Full Category Breakdown</h3>
+<div id="cat-list"></div>
+</div>
+<div class="card">
+<h2>Your Top 3 Spiritual Lies</h2>
+<p class="muted">Look at your three highest-scoring statements above. If you'd like, complete these sentences &mdash; this is for your own reflection.</p>
+<form id="reflection-form">
+<fieldset>
+<legend>1. One lie I may be telling myself is:</legend>
+<textarea id="refl-lie" placeholder="Write your reflection here..."></textarea>
+</fieldset>
+<fieldset>
+<legend>2. This lie helps me avoid:</legend>
+<div class="checkbox-grid" id="refl-avoids-grid"></div>
+</fieldset>
+<fieldset>
+<legend>3. The cost of believing this lie is:</legend>
+<textarea id="refl-cost" placeholder="Write your reflection here..."></textarea>
+</fieldset>
+<fieldset>
+<legend>4. One honest step I can take this week is:</legend>
+<textarea id="refl-step" placeholder="Write your reflection here..."></textarea>
+</fieldset>
+<button type="submit" class="btn-primary" id="btn-save">Save My Results</button>
+<div id="save-status"></div>
+</form>
+</div>
+<div class="closing hidden" id="closing-card">
+<h2>Thank You</h2>
+<p>Spiritual self-deception rarely feels like rebellion. It usually feels like wisdom, busyness, privacy, humility, caution, or "I'm just not ready."</p>
+<p>But if the result is delayed obedience, hidden sin, shallow Scripture engagement, weak repentance, little visible fruit, or no investment in helping others follow Jesus, the story deserves to be examined.</p>
+<p style="margin-bottom:0;"><strong>The goal of this assessment is not shame. The goal is truth that leads to freedom, obedience, and fruit.</strong></p>
+</div>
+<p class="footer-note">&copy; Center for Scripture Absorption &middot; Back to the Bible</p>
+</section>
+</div>
+<script>
+(function () {
+"use strict";
+var SUPABASE_URL = "https://kddfedrklpavwjjdenor.supabase.co";
+var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtkZGZlZHJrbHBhdndqamRlbm9yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5OTQyNjAsImV4cCI6MjA5MzU3MDI2MH0.ErAHkeM09KJb-yo0tstRcyttQeZHMkxlT66UKr3pmHg";
+var TABLE = "lying_to_myself_survey_responses";
+var QUESTIONS = [
+"I know what God wants me to do, but I delay obeying.",
+"I explain away parts of Scripture that confront my habits, comfort, or priorities.",
+"I consume Christian content more than I actually practice what I already know.",
+"I confuse being spiritually informed with being spiritually transformed.",
+"I avoid prayer or Scripture when I suspect God may confront something in me.",
+"I call something “discernment” when it may actually be fear, pride, or resistance.",
+"I am more bothered by other people’s sin than by my own.",
+"I can defend what I believe more easily than I can admit where I need to change.",
+"I keep certain parts of my life separate from my faith.",
+"I have habits, attitudes, or relationships I do not want brought into the light.",
+"I use busyness as a reason to avoid deeper spiritual growth.",
+"I choose comfort over obedience more often than I admit.",
+"I mistake guilt, regret, or feeling bad for real repentance.",
+"I protect my image as a good Christian more than I pursue honesty.",
+"I avoid accountability because I do not want someone to see the real pattern.",
+"I tell myself my faith is private, even when God may be calling me to invest in others.",
+"I receive spiritual encouragement, teaching, or care without intentionally passing it on.",
+"I tell myself I am not ready enough to mentor, encourage, or disciple someone else.",
+"I care about discipleship in theory more than I take concrete steps to help someone grow.",
+"I assume someone else is better suited to help people follow Jesus."
+];
+var CATEGORIES = [
+{ key: "cat_obedience_resistance", name: "Obedience Resistance", questions: [1, 12, 13],
+measures: "The gap between knowing and doing.",
+high: "You are not short on knowledge. You are short on follow-through. Repentance is a turn, not a feeling.",
+start: "Name the one thing you already know God has asked and you have delayed. Not ten. One. Do it this week." },
+{ key: "cat_rationalization", name: "Rationalization & Self-Justification", questions: [2, 6, 8],
+measures: "Whether your mind reinterprets truth so you do not have to submit to it.",
+high: "This is the most invisible category, because from the inside it does not feel like self-deception — it feels like being right.",
+start: "Name the conviction you defend hardest. Ask one person who disagrees with you to make the strongest case against it — and just listen." },
+{ key: "cat_consumption_without_transformation", name: "Consumption Without Transformation", questions: [3, 4],
+measures: "Whether you have mistaken spiritual input for spiritual change.",
+high: "Information has quietly become a substitute for obedience. More content will not fix it. More content is the symptom.",
+start: "For one month, add nothing new. No new book, podcast, plan, or study. Only practice what you already know." },
+{ key: "cat_image_management", name: "Image Management", questions: [7, 14, 15],
+measures: "Whether you protect the appearance of a good Christian more than you pursue the honesty of one.",
+high: "The performance has become the point. The better the performance, the fewer people are allowed near the actual you.",
+start: "Tell one trusted person one true thing you would normally keep hidden. Small is fine." },
+{ key: "cat_avoidance_compartmentalization", name: "Avoidance & Compartmentalization", questions: [5, 9, 10, 11],
+measures: "Whether you keep parts of your life away from God.",
+high: "There is a room you do not let God into, and part of you knows exactly which one. Avoidance can feel like peace, but it is the peace of not looking.",
+start: "Name the room. You do not have to fix it yet. Just stop pretending it is not there." },
+{ key: "cat_discipleship_deflection", name: "Discipleship Deflection", questions: [16, 17, 18, 19, 20],
+measures: "Whether you take in spiritual care without ever passing it on.",
+high: "You have turned “not yet” and “not me” into a permanent address. It is where mature believers hide most comfortably.",
+start: "Pick one person a step behind you. Not a program — a person. Take one concrete step this month." }
+];
+var AVOIDS_OPTIONS = [
+"Obedience", "Repentance", "Scripture", "Prayer", "Accountability",
+"Forgiveness", "Serving", "Mentoring or discipling someone",
+"Sharing my faith", "Being honest with God or others"
+];
+var TOTAL_BANDS = [
+{ max: 39, label: "Low pattern", cls: "band-clear", desc: "Low current self-deception pattern. Stay watchful." },
+{ max: 79, label: "Mild pattern", cls: "band-tender", desc: "Mild pattern. Some spiritual excuses may be active." },
+{ max: 119, label: "Moderate pattern", cls: "band-tender", desc: "Moderate pattern. You may be avoiding truth in several areas." },
+{ max: 159, label: "Strong pattern", cls: "band-stronghold", desc: "Strong pattern. Spiritual self-protection is likely shaping your obedience and relationships." },
+{ max: 200, label: "Entrenched pattern", cls: "band-stronghold", desc: "Entrenched pattern. This needs prayer, repentance, and a trusted person to help you interpret it." }
+];
+function catBand(avg) {
+if (avg <= 3.0) return { label: "Clear ground", cls: "band-clear", desc: "Not where you are hiding right now. Honest strength, or at least not a current stronghold." };
+if (avg <= 6.0) return { label: "Tender spot", cls: "band-tender", desc: "Something is here. Mixed and worth honest attention before it settles into a pattern." };
+return { label: "Stronghold", cls: "band-stronghold", desc: "An active area of self-protection. This is where the work is. Start here." };
+}
+function totalBand(total) {
+for (var i = 0; i < TOTAL_BANDS.length; i++) {
+if (total <= TOTAL_BANDS[i].max) return TOTAL_BANDS[i];
+}
+return TOTAL_BANDS[TOTAL_BANDS.length - 1];
+}
+function scrollToTop() {
+window.scrollTo(0, 0);
+}
+var answers = {};
+var screenIntro = document.getElementById("screen-intro");
+var screenSurvey = document.getElementById("screen-survey");
+var screenResults = document.getElementById("screen-results");
+var questionsList = document.getElementById("questions-list");
+var progressFill = document.getElementById("progress-fill");
+var progressLabel = document.getElementById("progress-label");
+function buildQuestions() {
+var html = "";
+for (var i = 0; i < QUESTIONS.length; i++) {
+var qn = i + 1;
+html += '<div class="question" id="q-wrap-' + qn + '" data-qn="' + qn + '">';
+html += '<div class="question-text"><span class="question-num">' + qn + '.</span>' + QUESTIONS[i] + '</div>';
+html += '<div class="scale-row">';
+for (var v = 0; v <= 10; v++) {
+html += '<button type="button" class="scale-btn" data-qn="' + qn + '" data-val="' + v + '">' + v + '</button>';
+}
+html += '</div></div>';
+}
+questionsList.innerHTML = html;
+questionsList.addEventListener("click", function (e) {
+var btn = e.target.closest(".scale-btn");
+if (!btn) return;
+var qn = parseInt(btn.getAttribute("data-qn"), 10);
+var val = parseInt(btn.getAttribute("data-val"), 10);
+answers[qn] = val;
+var wrap = document.getElementById("q-wrap-" + qn);
+wrap.classList.remove("missing");
+var siblings = wrap.querySelectorAll(".scale-btn");
+siblings.forEach(function (b) { b.classList.remove("selected"); });
+btn.classList.add("selected");
+updateProgress();
+});
+}
+function updateProgress() {
+var count = Object.keys(answers).length;
+progressFill.style.width = (count / 20 * 100) + "%";
+progressLabel.textContent = count + " of 20 answered";
+}
+function buildAvoidsCheckboxes() {
+var grid = document.getElementById("refl-avoids-grid");
+var html = "";
+for (var i = 0; i < AVOIDS_OPTIONS.length; i++) {
+html += '<label class="checkbox-item"><input type="checkbox" value="' + AVOIDS_OPTIONS[i] + '"> ' + AVOIDS_OPTIONS[i] + '</label>';
+}
+grid.innerHTML = html;
+}
+document.getElementById("btn-start").addEventListener("click", function () {
+screenIntro.classList.add("hidden");
+screenSurvey.classList.remove("hidden");
+scrollToTop();
+});
+document.getElementById("btn-see-results").addEventListener("click", function () {
+var missing = [];
+for (var qn = 1; qn <= 20; qn++) {
+if (typeof answers[qn] === "undefined") missing.push(qn);
+}
+if (missing.length > 0) {
+missing.forEach(function (qn) {
+document.getElementById("q-wrap-" + qn).classList.add("missing");
+});
+var firstMissing = document.getElementById("q-wrap-" + missing[0]);
+firstMissing.scrollIntoView({ behavior: "smooth", block: "center" });
+return;
+}
+showResults();
+});
+var lastComputed = null;
+function showResults() {
+var total = 0;
+for (var qn = 1; qn <= 20; qn++) total += answers[qn];
+var tBand = totalBand(total);
+document.getElementById("total-score-number").textContent = total;
+var pill = document.getElementById("total-band-pill");
+pill.textContent = tBand.label;
+pill.className = "band-pill " + tBand.cls;
+document.getElementById("total-band-desc").textContent = tBand.desc;
+var scored = [];
+for (var i = 1; i <= 20; i++) scored.push({ qn: i, score: answers[i], text: QUESTIONS[i - 1] });
+scored.sort(function (a, b) { return b.score - a.score; });
+var top3 = scored.slice(0, 3);
+var top3Html = "";
+top3.forEach(function (item) {
+top3Html += '<div class="top3-item"><span class="top3-score">' + item.score + '/10</span> &mdash; ' + item.text + '</div>';
+});
+document.getElementById("top3-list").innerHTML = top3Html;
+var catResults = CATEGORIES.map(function (cat) {
+var sum = 0;
+cat.questions.forEach(function (qn) { sum += answers[qn]; });
+var avg = sum / cat.questions.length;
+return { cat: cat, avg: avg, band: catBand(avg) };
+});
+var highest = catResults.reduce(function (a, b) { return b.avg > a.avg ? b : a; });
+var hb = highest.band;
+document.getElementById("highest-cat-box").innerHTML =
+'<div class="cat-highest">' +
+'<div class="cat-header"><span class="cat-name">Highest: ' + highest.cat.name + '</span>' +
+'<span class="band-pill ' + hb.cls + '">' + highest.avg.toFixed(1) + ' &middot; ' + hb.label + '</span></div>' +
+'<p style="margin:8px 0 4px;"><strong>What it measures:</strong> ' + highest.cat.measures + '</p>' +
+'<p style="margin:4px 0;">' + highest.cat.high + '</p>' +
+'<p style="margin:4px 0 0;"><strong>Where to start:</strong> ' + highest.cat.start + '</p>' +
+'</div>';
+var catListHtml = "";
+catResults.forEach(function (r) {
+catListHtml += '<div class="cat-row">' +
+'<div class="cat-header"><span class="cat-name">' + r.cat.name + '</span>' +
+'<span class="cat-score"><span class="band-pill ' + r.band.cls + '">' + r.avg.toFixed(1) + ' &middot; ' + r.band.label + '</span></span></div>' +
+'<p class="muted" style="margin:0;">' + r.cat.measures + '</p>' +
+'</div>';
+});
+document.getElementById("cat-list").innerHTML = catListHtml;
+lastComputed = { total: total, top3: top3, catResults: catResults };
+screenSurvey.classList.add("hidden");
+screenResults.classList.remove("hidden");
+scrollToTop();
+}
+document.getElementById("reflection-form").addEventListener("submit", function (e) {
+e.preventDefault();
+saveResults();
+});
+function saveResults() {
+var btn = document.getElementById("btn-save");
+var statusEl = document.getElementById("save-status");
+btn.disabled = true;
+btn.textContent = "Saving...";
+statusEl.className = "";
+statusEl.textContent = "";
+var avoidsChecked = Array.prototype.slice.call(
+document.querySelectorAll('#refl-avoids-grid input[type="checkbox"]:checked')
+).map(function (cb) { return cb.value; });
+var payload = {};
+for (var qn = 1; qn <= 20; qn++) payload["q" + qn] = answers[qn];
+payload.top3_questions = lastComputed.top3.map(function (i) { return i.qn; });
+payload.reflection_lie_text = document.getElementById("refl-lie").value.trim();
+payload.reflection_avoids = avoidsChecked;
+payload.reflection_cost_text = document.getElementById("refl-cost").value.trim();
+payload.reflection_step_text = document.getElementById("refl-step").value.trim();
+fetch(SUPABASE_URL + "/rest/v1/" + TABLE, {
+method: "POST",
+headers: {
+"apikey": SUPABASE_ANON_KEY,
+"Authorization": "Bearer " + SUPABASE_ANON_KEY,
+"Content-Type": "application/json",
+"Prefer": "return=minimal"
+},
+body: JSON.stringify(payload)
+}).then(function (resp) {
+if (!resp.ok) {
+return resp.text().then(function (t) { throw new Error(t || ("HTTP " + resp.status)); });
+}
+statusEl.className = "success";
+statusEl.textContent = "Saved. Thank you for your honesty.";
+btn.classList.add("hidden");
+document.getElementById("closing-card").classList.remove("hidden");
+document.querySelectorAll("#reflection-form textarea, #reflection-form input").forEach(function (el) {
+el.disabled = true;
+});
+}).catch(function (err) {
+statusEl.className = "error";
+statusEl.textContent = "We couldn't save your results. Please check your connection and try again.";
+btn.disabled = false;
+btn.textContent = "Save My Results";
+console.error("Survey save failed:", err);
+});
+}
+buildQuestions();
+buildAvoidsCheckboxes();
+})();
+</script>
+</body>
+</html>
