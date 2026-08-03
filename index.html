@@ -197,6 +197,31 @@ color: #fff;
 }
 .question.missing .question-text { color: var(--error); }
 .question.missing .scale-row .scale-btn { border-color: var(--error); }
+.choice-list {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+.choice-btn {
+display: block;
+width: 100%;
+text-align: left;
+padding: 12px 14px;
+border: 1.5px solid var(--border);
+background: #fff;
+border-radius: 8px;
+font-size: 0.95rem;
+font-weight: 500;
+color: var(--text);
+line-height: 1.4;
+}
+.choice-btn:hover { border-color: var(--orange); }
+.choice-btn.selected {
+background: var(--navy);
+border-color: var(--navy);
+color: #fff;
+}
+.question.missing .choice-list .choice-btn { border-color: var(--error); }
 .band-pill {
 display: inline-block;
 padding: 3px 12px;
@@ -379,6 +404,16 @@ h1 { font-size: 1.2rem; }
 <div class="card">
 <div id="questions-list"></div>
 </div>
+<button class="btn-primary" id="btn-to-demo">Continue</button>
+</section>
+<!-- SCREEN: DEMOGRAPHIC / CLASSIFICATION QUESTIONS -->
+<section id="screen-demo" class="hidden">
+<div class="card">
+<p class="muted" style="margin-bottom:0;">A few last questions to help us understand who's taking this assessment.</p>
+</div>
+<div class="card">
+<div id="demo-questions-list"></div>
+</div>
 <button class="btn-primary" id="btn-see-results">See My Results</button>
 </section>
 <!-- SCREEN: RESULTS -->
@@ -497,6 +532,30 @@ var AVOIDS_OPTIONS = [
 "Forgiveness", "Serving", "Mentoring or discipling someone",
 "Sharing my faith", "Being honest with God or others"
 ];
+var DEMO_QUESTIONS = [
+{ id: 21, field: "q21_afterlife_belief", type: "choice",
+text: "What do you believe will happen when you die?",
+options: [
+"I’m dead. That’s it",
+"I will experience heaven because I tried my best to be a good person and live a good life.",
+"I will experience heaven because I am devoted to my religion and its practices.",
+"I will experience heaven because I am saved by grace through faith in Jesus.",
+"I will be reincarnated.",
+"I will go to hell.",
+"I am not sure what will happen"
+] },
+{ id: 22, field: "q22_bible_days_per_week", type: "scale", min: 0, max: 7,
+text: "How many days in a week do you typically read or listen to the Bible?" },
+{ id: 23, field: "q23_discipling_frequency", type: "choice",
+text: "How often do you intentionally interact with someone you are discipling (helping grow spiritually)?",
+options: ["Never", "A few times a year or less", "Monthly", "Weekly", "Daily"] },
+{ id: 24, field: "q24_gender", type: "choice",
+text: "What is your gender?",
+options: ["Female", "Male", "Prefer not to respond"] },
+{ id: 25, field: "q25_age_bracket", type: "choice",
+text: "How old are you?",
+options: ["Under 18", "18-24", "25-34", "35-44", "45-54", "55+"] }
+];
 var TOTAL_BANDS = [
 { max: 39, label: "Low pattern", cls: "band-clear", desc: "Low current self-deception pattern. Stay watchful." },
 { max: 79, label: "Mild pattern", cls: "band-tender", desc: "Mild pattern. Some spiritual excuses may be active." },
@@ -519,10 +578,13 @@ function scrollToTop() {
 window.scrollTo(0, 0);
 }
 var answers = {};
+var demoAnswers = {};
 var screenIntro = document.getElementById("screen-intro");
 var screenSurvey = document.getElementById("screen-survey");
+var screenDemo = document.getElementById("screen-demo");
 var screenResults = document.getElementById("screen-results");
 var questionsList = document.getElementById("questions-list");
+var demoQuestionsList = document.getElementById("demo-questions-list");
 var progressFill = document.getElementById("progress-fill");
 var progressLabel = document.getElementById("progress-label");
 function buildQuestions() {
@@ -557,6 +619,45 @@ var count = Object.keys(answers).length;
 progressFill.style.width = (count / 20 * 100) + "%";
 progressLabel.textContent = count + " of 20 answered";
 }
+function buildDemoQuestions() {
+var html = "";
+DEMO_QUESTIONS.forEach(function (q) {
+html += '<div class="question" id="dq-wrap-' + q.id + '" data-qid="' + q.id + '">';
+html += '<div class="question-text"><span class="question-num">' + q.id + '.</span>' + q.text + '</div>';
+if (q.type === "choice") {
+html += '<div class="choice-list">';
+q.options.forEach(function (opt, idx) {
+html += '<button type="button" class="choice-btn" data-qid="' + q.id + '" data-value="' + idx + '">' + opt + '</button>';
+});
+html += '</div>';
+} else if (q.type === "scale") {
+html += '<div class="scale-row">';
+for (var v = q.min; v <= q.max; v++) {
+html += '<button type="button" class="scale-btn" data-qid="' + q.id + '" data-val="' + v + '">' + v + '</button>';
+}
+html += '</div>';
+}
+html += '</div>';
+});
+demoQuestionsList.innerHTML = html;
+demoQuestionsList.addEventListener("click", function (e) {
+var btn = e.target.closest(".choice-btn, .scale-btn");
+if (!btn) return;
+var qid = parseInt(btn.getAttribute("data-qid"), 10);
+var wrap = document.getElementById("dq-wrap-" + qid);
+if (btn.classList.contains("choice-btn")) {
+var qDef = DEMO_QUESTIONS.filter(function (q) { return q.id === qid; })[0];
+var idx = parseInt(btn.getAttribute("data-value"), 10);
+demoAnswers[qid] = qDef.options[idx];
+} else {
+demoAnswers[qid] = parseInt(btn.getAttribute("data-val"), 10);
+}
+wrap.classList.remove("missing");
+var siblings = wrap.querySelectorAll(".choice-btn, .scale-btn");
+siblings.forEach(function (b) { b.classList.remove("selected"); });
+btn.classList.add("selected");
+});
+}
 function buildAvoidsCheckboxes() {
 var grid = document.getElementById("refl-avoids-grid");
 var html = "";
@@ -570,7 +671,7 @@ screenIntro.classList.add("hidden");
 screenSurvey.classList.remove("hidden");
 scrollToTop();
 });
-document.getElementById("btn-see-results").addEventListener("click", function () {
+document.getElementById("btn-to-demo").addEventListener("click", function () {
 var missing = [];
 for (var qn = 1; qn <= 20; qn++) {
 if (typeof answers[qn] === "undefined") missing.push(qn);
@@ -580,6 +681,23 @@ missing.forEach(function (qn) {
 document.getElementById("q-wrap-" + qn).classList.add("missing");
 });
 var firstMissing = document.getElementById("q-wrap-" + missing[0]);
+firstMissing.scrollIntoView({ behavior: "smooth", block: "center" });
+return;
+}
+screenSurvey.classList.add("hidden");
+screenDemo.classList.remove("hidden");
+scrollToTop();
+});
+document.getElementById("btn-see-results").addEventListener("click", function () {
+var missing = [];
+DEMO_QUESTIONS.forEach(function (q) {
+if (typeof demoAnswers[q.id] === "undefined") missing.push(q.id);
+});
+if (missing.length > 0) {
+missing.forEach(function (qid) {
+document.getElementById("dq-wrap-" + qid).classList.add("missing");
+});
+var firstMissing = document.getElementById("dq-wrap-" + missing[0]);
 firstMissing.scrollIntoView({ behavior: "smooth", block: "center" });
 return;
 }
@@ -630,7 +748,7 @@ catListHtml += '<div class="cat-row">' +
 });
 document.getElementById("cat-list").innerHTML = catListHtml;
 lastComputed = { total: total, top3: top3, catResults: catResults };
-screenSurvey.classList.add("hidden");
+screenDemo.classList.add("hidden");
 screenResults.classList.remove("hidden");
 scrollToTop();
 }
@@ -650,6 +768,7 @@ document.querySelectorAll('#refl-avoids-grid input[type="checkbox"]:checked')
 ).map(function (cb) { return cb.value; });
 var payload = {};
 for (var qn = 1; qn <= 20; qn++) payload["q" + qn] = answers[qn];
+DEMO_QUESTIONS.forEach(function (q) { payload[q.field] = demoAnswers[q.id]; });
 payload.top3_questions = lastComputed.top3.map(function (i) { return i.qn; });
 payload.reflection_lie_text = document.getElementById("refl-lie").value.trim();
 payload.reflection_avoids = avoidsChecked;
@@ -684,6 +803,7 @@ console.error("Survey save failed:", err);
 });
 }
 buildQuestions();
+buildDemoQuestions();
 buildAvoidsCheckboxes();
 })();
 </script>
