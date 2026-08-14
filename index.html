@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Am I Lying to Myself Spiritually?</title>
+<title>Am I Fooling Myself?</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -368,6 +368,7 @@ h1 { font-size: 1.2rem; }
 .scale-btn { width: 26px; height: 34px; font-size: 0.78rem; }
 }
 </style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -378,7 +379,7 @@ h1 { font-size: 1.2rem; }
 <div id="app">
 <!-- SCREEN: INTRO -->
 <section id="screen-intro" class="card">
-<h1>Am I Lying to Myself Spiritually?</h1>
+<h1>Am I Fooling Myself?</h1>
 <p class="muted">A self-assessment from the Center for Scripture Absorption &middot; Arnie Cole, Ed.D. &middot; Back to the Bible</p>
 <p>Below are 20 statements about common ways Christians avoid spiritual honesty. Answer based on your <strong>real life right now</strong>, not what you believe should be true of you.</p>
 <div class="scale-legend">
@@ -461,6 +462,7 @@ h1 { font-size: 1.2rem; }
 <legend>4. One honest step I can take this week is:</legend>
 <textarea id="refl-step" placeholder="Write your reflection here..."></textarea>
 </fieldset>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAAEJdOH1k7Dpc28C0" data-action="submit_survey" style="margin-bottom:12px;"></div>
 <button type="submit" class="btn-primary" id="btn-save">Save My Results</button>
 <div id="save-status"></div>
 </form>
@@ -480,6 +482,7 @@ h1 { font-size: 1.2rem; }
 var SUPABASE_URL = "https://kigvrcsuqrapharysogb.supabase.co";
 var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpZ3ZyY3N1cXJhcGhhcnlzb2diIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Nzc0NDMsImV4cCI6MjEwMTM1MzQ0M30.TyV9rAJT6Zook1wh4OUgzkGzUgO1yyjhG4_YIx9wKIw";
 var TABLE = "lying_to_myself_survey_responses";
+var SUBMIT_URL = SUPABASE_URL + "/functions/v1/submit-survey";
 var QUESTIONS = [
 "I know what God wants me to do, but I delay obeying.",
 "I explain away parts of Scripture that confront my habits, comfort, or priorities.",
@@ -775,13 +778,19 @@ payload.reflection_lie_text = document.getElementById("refl-lie").value.trim();
 payload.reflection_avoids = avoidsChecked;
 payload.reflection_cost_text = document.getElementById("refl-cost").value.trim();
 payload.reflection_step_text = document.getElementById("refl-step").value.trim();
-fetch(SUPABASE_URL + "/rest/v1/" + TABLE, {
+var token = (window.turnstile && typeof turnstile.getResponse === "function") ? turnstile.getResponse() : "";
+if (!token) {
+statusEl.className = "error";
+statusEl.textContent = "Please complete the verification challenge, then try again.";
+btn.disabled = false;
+btn.textContent = "Save My Results";
+return;
+}
+payload.turnstileToken = token;
+fetch(SUBMIT_URL, {
 method: "POST",
 headers: {
-"apikey": SUPABASE_ANON_KEY,
-"Authorization": "Bearer " + SUPABASE_ANON_KEY,
-"Content-Type": "application/json",
-"Prefer": "return=minimal"
+"Content-Type": "application/json"
 },
 body: JSON.stringify(payload)
 }).then(function (resp) {
@@ -800,6 +809,7 @@ statusEl.className = "error";
 statusEl.textContent = "We couldn't save your results. Please check your connection and try again.";
 btn.disabled = false;
 btn.textContent = "Save My Results";
+if (window.turnstile && typeof turnstile.reset === "function") turnstile.reset();
 console.error("Survey save failed:", err);
 });
 }
