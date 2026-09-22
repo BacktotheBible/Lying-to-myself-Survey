@@ -368,7 +368,11 @@ h1 { font-size: 1.2rem; }
 .scale-btn { width: 26px; height: 34px; font-size: 0.78rem; }
 }
 </style>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<!-- Explicit render: the widget is created when the respondent reaches the results
+     screen (where Save lives), not on page load. Rendering it up front issued a
+     token to every visitor, and most never submit, so Cloudflare saw a pile of
+     tokens that were never verified. -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileReady" async defer></script>
 </head>
 <body>
 <header class="site-header">
@@ -462,7 +466,7 @@ h1 { font-size: 1.2rem; }
 <legend>4. One honest step I can take this week is:</legend>
 <textarea id="refl-step" placeholder="Write your reflection here..."></textarea>
 </fieldset>
-<div class="cf-turnstile" data-sitekey="0x4AAAAAAEJdOH1k7Dpc28C0" data-action="submit_survey" style="margin-bottom:12px;"></div>
+<div id="turnstile-box" style="margin-bottom:12px;"></div>
 <button type="submit" class="btn-primary" id="btn-save">Save My Results</button>
 <div id="save-status"></div>
 </form>
@@ -580,6 +584,29 @@ return TOTAL_BANDS[TOTAL_BANDS.length - 1];
 }
 function scrollToTop() {
 window.scrollTo(0, 0);
+}
+// --- Turnstile: created on demand, once the respondent reaches the results screen ---
+var TURNSTILE_SITEKEY = "0x4AAAAAAEJdOH1k7Dpc28C0";
+var turnstileWidget = null;
+var turnstileWanted = false;
+window.onTurnstileReady = function () {
+if (turnstileWanted) renderTurnstile();
+};
+function renderTurnstile() {
+turnstileWanted = true;
+if (turnstileWidget !== null) return;
+if (!window.turnstile || typeof turnstile.render !== "function") return; // onTurnstileReady will call back
+turnstileWidget = turnstile.render("#turnstile-box", {
+sitekey: TURNSTILE_SITEKEY,
+action: "submit_survey"
+});
+}
+function getTurnstileToken() {
+if (!window.turnstile || turnstileWidget === null) return "";
+return turnstile.getResponse(turnstileWidget) || "";
+}
+function resetTurnstile() {
+if (window.turnstile && turnstileWidget !== null) turnstile.reset(turnstileWidget);
 }
 var answers = {};
 var demoAnswers = {};
@@ -754,6 +781,7 @@ document.getElementById("cat-list").innerHTML = catListHtml;
 lastComputed = { total: total, top3: top3, catResults: catResults };
 screenDemo.classList.add("hidden");
 screenResults.classList.remove("hidden");
+renderTurnstile();
 scrollToTop();
 }
 document.getElementById("reflection-form").addEventListener("submit", function (e) {
@@ -778,7 +806,7 @@ payload.reflection_lie_text = document.getElementById("refl-lie").value.trim();
 payload.reflection_avoids = avoidsChecked;
 payload.reflection_cost_text = document.getElementById("refl-cost").value.trim();
 payload.reflection_step_text = document.getElementById("refl-step").value.trim();
-var token = (window.turnstile && typeof turnstile.getResponse === "function") ? turnstile.getResponse() : "";
+var token = getTurnstileToken();
 if (!token) {
 statusEl.className = "error";
 statusEl.textContent = "Please complete the verification challenge, then try again.";
@@ -809,7 +837,7 @@ statusEl.className = "error";
 statusEl.textContent = "We couldn't save your results. Please check your connection and try again.";
 btn.disabled = false;
 btn.textContent = "Save My Results";
-if (window.turnstile && typeof turnstile.reset === "function") turnstile.reset();
+resetTurnstile();
 console.error("Survey save failed:", err);
 });
 }
