@@ -371,7 +371,14 @@ h1 { font-size: 1.2rem; }
 <!-- Explicit render: the widget is created when the respondent reaches the results
      screen (where Save lives), not on page load. Rendering it up front issued a
      token to every visitor, and most never submit, so Cloudflare saw a pile of
-     tokens that were never verified. -->
+     tokens that were never verified. The callback is defined here, before the
+     API script, because Cloudflare looks for it as soon as it loads. -->
+<script>
+window.onTurnstileReady = function () {
+window.turnstileApiReady = true;
+if (typeof window.renderTurnstileNow === "function") window.renderTurnstileNow();
+};
+</script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileReady" async defer></script>
 </head>
 <body>
@@ -588,14 +595,12 @@ window.scrollTo(0, 0);
 // --- Turnstile: created on demand, once the respondent reaches the results screen ---
 var TURNSTILE_SITEKEY = "0x4AAAAAAEJdOH1k7Dpc28C0";
 var turnstileWidget = null;
-var turnstileWanted = false;
-window.onTurnstileReady = function () {
-if (turnstileWanted) renderTurnstile();
-};
 function renderTurnstile() {
-turnstileWanted = true;
 if (turnstileWidget !== null) return;
-if (!window.turnstile || typeof turnstile.render !== "function") return; // onTurnstileReady will call back
+if (!window.turnstile || typeof turnstile.render !== "function") {
+window.renderTurnstileNow = renderTurnstile;  // the onload callback above will call it
+return;
+}
 turnstileWidget = turnstile.render("#turnstile-box", {
 sitekey: TURNSTILE_SITEKEY,
 action: "submit_survey"
